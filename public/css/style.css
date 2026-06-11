@@ -1,7 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
         html, body {
             background: #f4f6f9;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Poppins', sans-serif;
             overflow-x: hidden;
             width: 100%;
         }
@@ -415,4 +416,28 @@ html {
 
 .table-custom tbody tr:hover {
     background-color: #e2e8f0 !important;
+}
+
+/* DASHBOARD MINI CARDS CLICKABLE */
+.dashboard-mini-card {
+    transition: all 0.25s ease !important;
+    border: 1px solid transparent !important;
+}
+
+.dashboard-mini-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
+    border-color: #e2e8f0 !important;
+}
+
+a:has(.dashboard-mini-card) {
+    display: block;
+}
+
+a:has(.dashboard-mini-card) h6 {
+    color: #333 !important;
+}
+
+a:has(.dashboard-mini-card):hover h6 {
+    color: #1e90ff !important;
 }

@@ -23,7 +23,7 @@
                 <div id="authLogo" class="auth-logo">
                     <img src="{{ asset('img/logo.png') }}" alt="Logo Apotek" width="140" style="object-fit: contain; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));">
                 </div>
-                <p id="desc">Mulai Kelola Apotek Anda</p>
+                <p id="desc">Mulai Kelola Toko Obat Templek Sehat Anda</p>
                 <button type="button" onclick="toggleMode()">Daftar</button>
             </div>
         </div>

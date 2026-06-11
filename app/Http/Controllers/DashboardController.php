@@ -7,6 +7,7 @@ use App\Models\Transaksi;
 use App\Models\Kategori;
 use App\Models\Jenis;
 use App\Models\Satuan;
+use App\Models\Supplier;
 
 class DashboardController extends Controller
 {   
@@ -45,6 +46,7 @@ class DashboardController extends Controller
             'kategori' => Kategori::count(),
             'jenis' => Jenis::count(),
             'satuan' => Satuan::count(),
+            'totalSupplier' => Supplier::count(),
 
             'kadaluarsa' => Obat::whereNotNull('tgl_kadaluarsa')->where('tgl_kadaluarsa','<=', now()->addDays(30))->get(),
             

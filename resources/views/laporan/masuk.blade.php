@@ -29,7 +29,6 @@
                 <div class="filter-action d-flex gap-2">
                     <button type="submit" class="btn btn-primary">👁 TAMPILKAN</button>
                     <a href="{{ url('/laporan/masuk/export') }}?{{ http_build_query(request()->all()) }}" class="btn btn-success">📊 EXPORT EXCEL</a>
-                    <button type="button" class="btn btn-warning" onclick="window.print()">🖨 CETAK DATA</button>
                 </div>
             </div>
         </form>

@@ -11,7 +11,7 @@
     <h4>Halo, {{ auth()->user()->name }}.</h4>
 
     <p class="mb-0 font-weight-bold">
-        Selamat datang di Web Sistem Informasi Apotek Templek Sehat!
+        Selamat datang di Sistem Informasi Supply Chain Management Toko Obat Templek Sehat.
     </p>
 
 </div>
@@ -64,7 +64,8 @@
 <div class="row mb-4">
 
     <div class="col-md-3 mb-3">
-        <div class="card p-3 shadow-sm d-flex flex-row align-items-center border-0" style="border-radius: 10px;">
+        <a href="/kategori" class="text-decoration-none d-block">
+        <div class="card p-3 shadow-sm d-flex flex-row align-items-center border-0 dashboard-mini-card" style="border-radius: 10px; cursor: pointer; transition: all 0.25s;">
             <div class="me-3" style="font-size: 1.5rem; color: #4a81d4;">
                 <i class="bi bi-grid-3x3-gap-fill"></i>
             </div>
@@ -72,43 +73,54 @@
                 <h6 class="mb-0 fw-bold">Kategori Barang</h6>
                 <small class="text-muted">{{ $kategori }} Item</small>
             </div>
+
         </div>
+        </a>
     </div>
 
     <div class="col-md-3 mb-3">
-        <div class="card p-3 shadow-sm d-flex flex-row align-items-center border-0" style="border-radius: 10px;">
-            <div class="me-3" style="font-size: 1.5rem; color: #4a81d4;">
-                <i class="bi bi-grid-3x3-gap-fill"></i>
+        <a href="/jenis" class="text-decoration-none d-block">
+        <div class="card p-3 shadow-sm d-flex flex-row align-items-center border-0 dashboard-mini-card" style="border-radius: 10px; cursor: pointer; transition: all 0.25s;">
+            <div class="me-3" style="font-size: 1.5rem; color: #6f42c1;">
+                <i class="bi bi-tags-fill"></i>
             </div>
             <div>
                 <h6 class="mb-0 fw-bold">Jenis Barang</h6>
                 <small class="text-muted">{{ $jenis }} Item</small>
             </div>
+
         </div>
+        </a>
     </div>
 
     <div class="col-md-3 mb-3">
-        <div class="card p-3 shadow-sm d-flex flex-row align-items-center border-0" style="border-radius: 10px;">
-            <div class="me-3" style="font-size: 1.5rem; color: #4a81d4;">
-                <i class="bi bi-grid-3x3-gap-fill"></i>
+        <a href="/satuan" class="text-decoration-none d-block">
+        <div class="card p-3 shadow-sm d-flex flex-row align-items-center border-0 dashboard-mini-card" style="border-radius: 10px; cursor: pointer; transition: all 0.25s;">
+            <div class="me-3" style="font-size: 1.5rem; color: #20c997;">
+                <i class="bi bi-rulers"></i>
             </div>
             <div>
                 <h6 class="mb-0 fw-bold">Satuan Barang</h6>
                 <small class="text-muted">{{ $satuan }} Item</small>
             </div>
+
         </div>
+        </a>
     </div>
 
     <div class="col-md-3 mb-3">
-        <div class="card p-3 shadow-sm d-flex flex-row align-items-center border-0" style="border-radius: 10px;">
-            <div class="me-3" style="font-size: 1.5rem; color: #4a81d4;">
-                <i class="bi bi-grid-3x3-gap-fill"></i>
+        <a href="/supplier" class="text-decoration-none d-block">
+        <div class="card p-3 shadow-sm d-flex flex-row align-items-center border-0 dashboard-mini-card" style="border-radius: 10px; cursor: pointer; transition: all 0.25s;">
+            <div class="me-3" style="font-size: 1.5rem; color: #fd7e14;">
+                <i class="bi bi-truck"></i>
             </div>
             <div>
-                <h6 class="mb-0 fw-bold">Data User</h6>
-                <small class="text-muted">{{ \App\Models\User::count() }} Item</small>
+                <h6 class="mb-0 fw-bold">Data Supplier</h6>
+                <small class="text-muted">{{ $totalSupplier }} Item</small>
             </div>
+
         </div>
+        </a>
     </div>
 
 </div>
