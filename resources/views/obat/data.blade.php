@@ -13,8 +13,8 @@
 
     <!-- HEADER -->
     <div class="header-blue">
-        <h4>DATA BARANG</h4>
-        <small>Beranda > Master > Data Barang</small>
+        <h4>DATA OBAT</h4>
+        <small>Beranda > Master > Data Obat</small>
     </div>
 
     <!-- CARD -->
@@ -23,11 +23,10 @@
         <!-- TOP -->
         <div class="table-top">
             <div>
-                <h5>Data Barang</h5>
+                <h5>Data Obat</h5>
                 <small>
-                    Tampilkan 
+                    Tampilkan
                     <select>
-                        <option>6</option>
                         <option>10</option>
                     </select> Data
                 </small>
@@ -47,13 +46,15 @@
             <thead>
                 <tr>
                     <th>No</th>
-                    <th>ID Barang</th>
-                    <th>Nama Barang</th>
+                    <th>ID Obat</th>
+                    <th>Nama Obat</th>
                     <th>Kategori</th>
                     <th>Jenis</th>
-                    <th>Barang Masuk</th>
-                    <th>Barang Keluar</th>
+                    <th>Supplier</th>
+                    <th>Obat Masuk</th>
+                    <th>Obat Keluar</th>
                     <th>Stok Sisa</th>
+                    <th>Stok Min</th>
                     <th>Satuan</th>
                     <th>Aksi</th>
                 </tr>
@@ -67,12 +68,21 @@
                     <td>{{ $item->nama }}</td>
                     <td>{{ $item->kategori->nama ?? '-' }}</td>
                     <td>{{ $item->jenis->nama ?? '-' }}</td>
+                    <td>{{ $item->supplier->nama ?? '-' }}</td>
                     <td>{{ $item->transaksi->where('jenis', 'masuk')->sum('jumlah') }}</td>
-                    <td>{{ $item->transaksi->where('jenis', 'keluar')->sum('jumlah') }}</td>
+                    <td>{{ $item->transaksi->whereIn('jenis', ['keluar','kadaluarsa'])->sum('jumlah') }}</td>
                     <td>
-                        <span class="badge {{ $item->stok <= 0 ? 'bg-danger' : 'bg-success' }}">
+                        <span class="badge {{ $item->stok <= 0 ? 'bg-danger' : ($item->stok_menipis ? 'bg-warning text-dark' : 'bg-success') }}">
                             {{ $item->stok }}
                         </span>
+                    </td>
+                    <td>
+                        @php $stokMin = $item->satuan->stok_min ?? 0; @endphp
+                        @if($stokMin > 0)
+                            <span class="badge bg-secondary">{{ $stokMin }}</span>
+                        @else
+                            <span class="text-muted">-</span>
+                        @endif
                     </td>
                     <td>{{ $item->satuan->nama ?? '-' }}</td>
                     <td class="aksi d-flex gap-1">
@@ -86,7 +96,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="10" style="text-align: center;">Tidak ada data</td>
+                    <td colspan="12" style="text-align: center;">Tidak ada data</td>
                 </tr>
                 @endforelse
             </tbody>
@@ -95,7 +105,6 @@
         <!-- FOOTER -->
         <div class="table-footer">
             <small>Menampilkan {{ $obat->firstItem() ?? 0 }} sampai {{ $obat->lastItem() ?? 0 }} dari {{ $obat->total() }} data</small>
-
             <div class="pagination">
                 {{ $obat->links() }}
             </div>
@@ -115,15 +124,15 @@
                     </div>
                     <div class="modal-body">
                         <div class="mb-3" style="display: none;">
-                            <label>ID Barang (Kode)</label>
+                            <label>ID Obat (Kode)</label>
                             <input type="text" name="kode" class="form-control" value="AUTO" readonly>
                         </div>
                         <div class="mb-3">
-                            <label>Nama Barang</label>
+                            <label>Nama Obat <span class="text-danger">*</span></label>
                             <input type="text" name="nama" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                            <label>Kategori</label>
+                            <label>Kategori <span class="text-danger">*</span></label>
                             <select name="kategori_id" class="form-control" required>
                                 <option value="">-- Pilih Kategori --</option>
                                 @foreach($kategoriList as $k)
@@ -132,7 +141,7 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label>Jenis</label>
+                            <label>Jenis <span class="text-danger">*</span></label>
                             <select name="jenis_id" class="form-control" required>
                                 <option value="">-- Pilih Jenis --</option>
                                 @foreach($jenisList as $j)
@@ -140,13 +149,21 @@
                                 @endforeach
                             </select>
                         </div>
-
                         <div class="mb-3">
-                            <label>Satuan</label>
+                            <label>Satuan <span class="text-danger">*</span></label>
                             <select name="satuan_id" class="form-control" required>
                                 <option value="">-- Pilih Satuan --</option>
                                 @foreach($satuanList as $s)
-                                    <option value="{{ $s->id }}">{{ $s->nama }}</option>
+                                    <option value="{{ $s->id }}">{{ $s->nama }}{{ $s->stok_min > 0 ? ' (min: '.$s->stok_min.')' : '' }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label>Supplier</label>
+                            <select name="supplier_id" class="form-control">
+                                <option value="">-- Pilih Supplier --</option>
+                                @foreach($supplierList as $sup)
+                                    <option value="{{ $sup->id }}">{{ $sup->nama }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -174,11 +191,11 @@
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label>ID Barang (Kode)</label>
+                            <label>ID Obat (Kode)</label>
                             <input type="text" name="kode" class="form-control" value="{{ $item->kode }}" readonly>
                         </div>
                         <div class="mb-3">
-                            <label>Nama Barang</label>
+                            <label>Nama Obat <span class="text-danger">*</span></label>
                             <input type="text" name="nama" class="form-control" value="{{ $item->nama }}" required>
                         </div>
                         <div class="mb-3">
@@ -203,15 +220,25 @@
                             <label>Stok Saat Ini</label>
                             <input type="number" class="form-control" value="{{ $item->stok }}" readonly disabled
                                 style="background:#f0f0f0; cursor:not-allowed;">
-                            <small class="text-muted">Stok dihitung otomatis dari barang masuk &minus; keluar</small>
+                            <small class="text-muted">Stok dihitung otomatis dari obat masuk &minus; keluar</small>
                         </div>
-
                         <div class="mb-3">
                             <label>Satuan</label>
                             <select name="satuan_id" class="form-control" required>
                                 <option value="">-- Pilih Satuan --</option>
                                 @foreach($satuanList as $s)
-                                    <option value="{{ $s->id }}" {{ $item->satuan_id == $s->id ? 'selected' : '' }}>{{ $s->nama }}</option>
+                                    <option value="{{ $s->id }}" {{ $item->satuan_id == $s->id ? 'selected' : '' }}>
+                                        {{ $s->nama }}{{ $s->stok_min > 0 ? ' (min: '.$s->stok_min.')' : '' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label>Supplier</label>
+                            <select name="supplier_id" class="form-control">
+                                <option value="">-- Pilih Supplier --</option>
+                                @foreach($supplierList as $sup)
+                                    <option value="{{ $sup->id }}" {{ $item->supplier_id == $sup->id ? 'selected' : '' }}>{{ $sup->nama }}</option>
                                 @endforeach
                             </select>
                         </div>

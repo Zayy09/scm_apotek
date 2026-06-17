@@ -6,13 +6,13 @@
 
     <!-- HEADER -->
     <div class="header-blue">
-        <h4>LAPORAN BARANG KELUAR</h4>
-        <small>Master > Laporan Barang > Laporan Barang Keluar</small>
+        <h4>LAPORAN OBAT KELUAR</h4>
+        <small>Master > Laporan Obat > Laporan Obat Keluar</small>
     </div>
 
     <!-- FILTER -->
     <div class="card-box mb-3">
-        <h5 style="margin-bottom:15px;">Filter Data Barang</h5>
+        <h5 style="margin-bottom:15px;">Filter Data Obat</h5>
 
         <form action="/laporan/keluar" method="GET">
             <div class="filter-box">
@@ -39,7 +39,7 @@
 
         <div class="table-top">
             <div>
-                <h5>Data Laporan Barang Keluar</h5>
+                <h5>Data Laporan Obat Keluar</h5>
                 <small>
                     Tampilkan 
                     <select>
@@ -55,8 +55,8 @@
             <thead>
                 <tr>
                     <th>No</th>
-                    <th>Kode Barang</th>
-                    <th>Nama Barang</th>
+                    <th>Kode Obat</th>
+                    <th>Nama Obat</th>
                     <th>Tanggal Keluar</th>
                     <th>Satuan</th>
                     <th>Jumlah Keluar</th>
@@ -71,7 +71,7 @@
                     <td>{{ $item->obat->kode ?? '-' }}</td>
                     <td>{{ $item->obat->nama ?? 'Obat Dihapus' }}</td>
                     <td>{{ $item->tanggal }}</td>
-                    <td>{{ $item->obat->satuan ?? '-' }}</td>
+                    <td>{{ $item->obat->satuan->nama ?? '-' }}</td>
                     <td>{{ $item->jumlah }}</td>
                     <td>{{ $item->keterangan }}</td>
                 </tr>

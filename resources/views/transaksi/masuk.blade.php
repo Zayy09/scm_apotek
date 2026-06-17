@@ -9,10 +9,17 @@
     </div>
 @endif
 
+@if(session('stok_menipis'))
+    <div class="alert alert-warning alert-dismissible fade show mt-2" role="alert" style="border-radius: 10px;">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('stok_menipis') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
 <!-- HEADER -->
 <div class="header-blue">
-    <h4 class="mb-1">BARANG MASUK</h4>
-    <small>Transaksi > Barang Masuk</small>
+    <h4 class="mb-1">OBAT MASUK</h4>
+    <small>Transaksi > Obat Masuk</small>
 </div>
 
 <!-- CARD -->
@@ -21,11 +28,10 @@
     <!-- TOP -->
     <div class="table-top">
         <div>
-            <h5>Data Barang Masuk</h5>
+            <h5>Data Obat Masuk</h5>
             <small>
-                Tampilkan 
+                Tampilkan
                 <select>
-                    <option>6</option>
                     <option>10</option>
                 </select>
                 Data
@@ -42,8 +48,9 @@
         <thead>
             <tr>
                 <th>No</th>
-                <th>Nama Barang</th>
+                <th>Nama Obat</th>
                 <th>Tanggal Masuk</th>
+                <th>Tgl Kadaluarsa (Batch)</th>
                 <th>Satuan</th>
                 <th>Jmlh Masuk</th>
                 <th>Total Stok (Saat Ini)</th>
@@ -58,6 +65,20 @@
                 <td>{{ $transaksi->firstItem() + $index }}</td>
                 <td>{{ $item->obat->nama }}</td>
                 <td>{{ $item->tanggal }}</td>
+                <td>
+                    @if($item->tgl_kadaluarsa)
+                        @php
+                            $kdDate = \Carbon\Carbon::parse($item->tgl_kadaluarsa);
+                            $isExp  = $kdDate->isPast();
+                            $isNear = !$isExp && \Carbon\Carbon::now()->diffInDays($kdDate, false) <= 90;
+                        @endphp
+                        <span class="badge {{ $isExp ? 'bg-danger' : ($isNear ? 'bg-warning text-dark' : 'bg-success') }}">
+                            {{ $kdDate->format('d/m/Y') }}
+                        </span>
+                    @else
+                        <span class="text-muted">-</span>
+                    @endif
+                </td>
                 <td>{{ $item->obat->satuan->nama ?? '-' }}</td>
                 <td>{{ $item->jumlah }}</td>
                 <td>{{ $item->obat->stok }}</td>
@@ -76,7 +97,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="8" style="text-align: center;">Tidak ada data</td>
+                <td colspan="9" style="text-align: center;">Tidak ada data</td>
             </tr>
             @endforelse
         </tbody>
@@ -85,7 +106,6 @@
     <!-- FOOTER -->
     <div class="table-footer">
         <small>Menampilkan {{ $transaksi->firstItem() ?? 0 }} sampai {{ $transaksi->lastItem() ?? 0 }} dari {{ $transaksi->total() }} data</small>
-
         <div class="pagination">
             {{ $transaksi->links() }}
         </div>
@@ -101,30 +121,31 @@
                 @csrf
                 <input type="hidden" name="jenis" value="masuk">
                 <div class="modal-header">
-                    <h5 class="modal-title">Tambah Barang Masuk</h5>
+                    <h5 class="modal-title">Tambah Obat Masuk</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label>Obat / Barang</label>
+                        <label>Nama Obat <span class="text-danger">*</span></label>
                         <select name="obat_id" class="form-control" required>
-                            <option value="">Pilih Barang...</option>
+                            <option value="">Pilih Obat...</option>
                             @foreach($obat as $o)
                                 <option value="{{ $o->id }}">{{ $o->kode }} - {{ $o->nama }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label>Tanggal Masuk</label>
+                        <label>Tanggal Masuk <span class="text-danger">*</span></label>
                         <input type="date" name="tanggal" class="form-control" value="{{ date('Y-m-d') }}" required>
                     </div>
                     <div class="mb-3">
-                        <label>Jumlah Masuk</label>
+                        <label>Jumlah Masuk <span class="text-danger">*</span></label>
                         <input type="number" name="jumlah" class="form-control" min="1" required>
                     </div>
                     <div class="mb-3">
-                        <label>Tanggal Kadaluarsa</label>
+                        <label>Tanggal Kadaluarsa Batch Ini</label>
                         <input type="date" name="tgl_kadaluarsa" class="form-control">
+                        <small class="text-muted">Tanggal kadaluarsa untuk batch/lot obat yang masuk ini (opsional).</small>
                     </div>
                     <div class="mb-3">
                         <label>Keterangan</label>
@@ -150,14 +171,14 @@
                 @method('PUT')
                 <input type="hidden" name="jenis" value="masuk">
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Barang Masuk</h5>
+                    <h5 class="modal-title">Edit Obat Masuk</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label>Obat / Barang</label>
+                        <label>Nama Obat</label>
                         <select name="obat_id" class="form-control" required>
-                            <option value="">Pilih Barang...</option>
+                            <option value="">Pilih Obat...</option>
                             @foreach($obat as $o)
                                 <option value="{{ $o->id }}" {{ $item->obat_id == $o->id ? 'selected' : '' }}>{{ $o->kode }} - {{ $o->nama }}</option>
                             @endforeach
@@ -172,8 +193,9 @@
                         <input type="number" name="jumlah" class="form-control" min="1" value="{{ $item->jumlah }}" required>
                     </div>
                     <div class="mb-3">
-                        <label>Tanggal Kadaluarsa</label>
-                        <input type="date" name="tgl_kadaluarsa" class="form-control" value="{{ $item->obat->tgl_kadaluarsa }}">
+                        <label>Tanggal Kadaluarsa Batch Ini</label>
+                        <input type="date" name="tgl_kadaluarsa" class="form-control" value="{{ $item->tgl_kadaluarsa }}">
+                        <small class="text-muted">Tanggal kadaluarsa untuk batch/lot obat ini.</small>
                     </div>
                     <div class="mb-3">
                         <label>Keterangan</label>

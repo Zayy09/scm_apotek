@@ -13,8 +13,8 @@
 
     <!-- HEADER -->
     <div class="header-blue">
-        <h4>SATUAN BARANG</h4>
-        <small>Master > Stock Barang > Data Satuan</small>
+        <h4>SATUAN OBAT</h4>
+        <small>Master > Stock Obat > Data Satuan</small>
     </div>
 
     <!-- CARD -->
@@ -23,11 +23,11 @@
         <!-- TOP -->
         <div class="table-top">
             <div>
-                <h5>Data Satuan Barang</h5>
+                <h5>Data Satuan Obat</h5>
                 <small>
-                    Tampilkan 
+                    Tampilkan
                     <select>
-                        <option>6</option>
+                        <option>10</option>
                     </select> Data
                 </small>
             </div>
@@ -46,7 +46,8 @@
             <thead>
                 <tr>
                     <th width="60">No</th>
-                    <th>Satuan Barang</th>
+                    <th>Satuan Obat</th>
+                    <th>Stok Minimum</th>
                     <th width="180">Aksi</th>
                 </tr>
             </thead>
@@ -56,6 +57,13 @@
                 <tr>
                     <td>{{ $satuan->firstItem() + $index }}</td>
                     <td>{{ $item->nama }}</td>
+                    <td>
+                        @if($item->stok_min > 0)
+                            <span class="badge bg-warning text-dark">{{ $item->stok_min }}</span>
+                        @else
+                            <span class="text-muted">-</span>
+                        @endif
+                    </td>
                     <td class="aksi d-flex gap-1">
                         <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editModal{{ $item->id }}">✏ Edit</button>
                         <form action="/satuan/{{ $item->id }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus data ini?');" style="margin:0;">
@@ -67,7 +75,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="3" style="text-align: center;">Tidak ada data</td>
+                    <td colspan="4" style="text-align: center;">Tidak ada data</td>
                 </tr>
                 @endforelse
             </tbody>
@@ -76,7 +84,6 @@
         <!-- FOOTER -->
         <div class="table-footer">
             <small>Menampilkan {{ $satuan->firstItem() ?? 0 }} sampai {{ $satuan->lastItem() ?? 0 }} dari {{ $satuan->total() }} data</small>
-
             <div class="pagination">
                 {{ $satuan->links() }}
             </div>
@@ -96,8 +103,13 @@
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label>Nama Satuan</label>
+                            <label>Nama Satuan <span class="text-danger">*</span></label>
                             <input type="text" name="nama" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Stok Minimum</label>
+                            <input type="number" name="stok_min" class="form-control" min="0" value="0">
+                            <small class="text-muted">Notifikasi stok menipis akan muncul jika stok obat mencapai nilai ini. Isi 0 untuk menonaktifkan.</small>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -123,8 +135,13 @@
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label>Nama Satuan</label>
+                            <label>Nama Satuan <span class="text-danger">*</span></label>
                             <input type="text" name="nama" class="form-control" value="{{ $item->nama }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Stok Minimum</label>
+                            <input type="number" name="stok_min" class="form-control" min="0" value="{{ $item->stok_min }}">
+                            <small class="text-muted">Notifikasi stok menipis akan muncul jika stok obat mencapai nilai ini. Isi 0 untuk menonaktifkan.</small>
                         </div>
                     </div>
                     <div class="modal-footer">

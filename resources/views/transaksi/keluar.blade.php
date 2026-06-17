@@ -9,10 +9,17 @@
     </div>
 @endif
 
+@if(session('stok_menipis'))
+    <div class="alert alert-warning alert-dismissible fade show mt-2" role="alert" style="border-radius: 10px;">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('stok_menipis') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
 <!-- HEADER -->
 <div class="header-blue">
-    <h4 class="mb-1">BARANG KELUAR</h4>
-    <small>Transaksi > Barang Keluar</small>
+    <h4 class="mb-1">OBAT KELUAR</h4>
+    <small>Transaksi > Obat Keluar</small>
 </div>
 
 <!-- CARD -->
@@ -21,11 +28,10 @@
     <!-- TOP -->
     <div class="table-top">
         <div>
-            <h5>Data Barang Keluar</h5>
+            <h5>Data Obat Keluar</h5>
             <small>
-                Tampilkan 
+                Tampilkan
                 <select>
-                    <option>6</option>
                     <option>10</option>
                 </select>
                 Data
@@ -42,7 +48,7 @@
         <thead>
             <tr>
                 <th>No</th>
-                <th>Nama Barang</th>
+                <th>Nama Obat</th>
                 <th>Tanggal Keluar</th>
                 <th>Satuan</th>
                 <th>Jmlh Keluar</th>
@@ -60,7 +66,15 @@
                 <td>{{ $item->tanggal }}</td>
                 <td>{{ $item->obat->satuan->nama ?? '-' }}</td>
                 <td>{{ $item->jumlah }}</td>
-                <td>{{ $item->obat->stok }}</td>
+                <td>
+                    @php $sisaStok = $item->obat->stok; $stokMin = $item->obat->stok_min; @endphp
+                    <span class="badge {{ $sisaStok <= 0 ? 'bg-danger' : ($stokMin > 0 && $sisaStok <= $stokMin ? 'bg-warning text-dark' : 'bg-success') }}">
+                        {{ $sisaStok }}
+                        @if($stokMin > 0 && $sisaStok <= $stokMin && $sisaStok > 0)
+                            <i class="bi bi-exclamation-triangle-fill ms-1"></i>
+                        @endif
+                    </span>
+                </td>
                 <td>{{ $item->keterangan }}</td>
 
                 <td class="aksi">
@@ -85,7 +99,6 @@
     <!-- FOOTER -->
     <div class="table-footer">
         <small>Menampilkan {{ $transaksi->firstItem() ?? 0 }} sampai {{ $transaksi->lastItem() ?? 0 }} dari {{ $transaksi->total() }} data</small>
-
         <div class="pagination">
             {{ $transaksi->links() }}
         </div>
@@ -101,25 +114,25 @@
                 @csrf
                 <input type="hidden" name="jenis" value="keluar">
                 <div class="modal-header">
-                    <h5 class="modal-title">Tambah Barang Keluar</h5>
+                    <h5 class="modal-title">Tambah Obat Keluar</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label>Obat / Barang</label>
+                        <label>Nama Obat <span class="text-danger">*</span></label>
                         <select name="obat_id" class="form-control" required>
-                            <option value="">Pilih Barang...</option>
+                            <option value="">Pilih Obat...</option>
                             @foreach($obat as $o)
-                                <option value="{{ $o->id }}">{{ $o->kode }} - {{ $o->nama }}</option>
+                                <option value="{{ $o->id }}">{{ $o->kode }} - {{ $o->nama }} (Stok: {{ $o->stok }})</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label>Tanggal Keluar</label>
+                        <label>Tanggal Keluar <span class="text-danger">*</span></label>
                         <input type="date" name="tanggal" class="form-control" value="{{ date('Y-m-d') }}" required>
                     </div>
                     <div class="mb-3">
-                        <label>Jumlah Keluar</label>
+                        <label>Jumlah Keluar <span class="text-danger">*</span></label>
                         <input type="number" name="jumlah" class="form-control" min="1" required>
                     </div>
                     <div class="mb-3">
@@ -146,14 +159,14 @@
                 @method('PUT')
                 <input type="hidden" name="jenis" value="keluar">
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Barang Keluar</h5>
+                    <h5 class="modal-title">Edit Obat Keluar</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label>Obat / Barang</label>
+                        <label>Nama Obat</label>
                         <select name="obat_id" class="form-control" required>
-                            <option value="">Pilih Barang...</option>
+                            <option value="">Pilih Obat...</option>
                             @foreach($obat as $o)
                                 <option value="{{ $o->id }}" {{ $item->obat_id == $o->id ? 'selected' : '' }}>{{ $o->kode }} - {{ $o->nama }}</option>
                             @endforeach

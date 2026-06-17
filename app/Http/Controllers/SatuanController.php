@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
 use App\Models\Satuan;
 
 class SatuanController extends Controller
@@ -21,7 +20,10 @@ class SatuanController extends Controller
     public function store(Request $request)
     {
         $request->validate(['nama' => 'required']);
-        $satuan = Satuan::create($request->all());
+        $satuan = Satuan::create([
+            'nama'     => $request->nama,
+            'stok_min' => $request->stok_min ?? 0,
+        ]);
         if ($request->ajax()) {
             return response()->json(['success' => true, 'message' => 'Satuan berhasil ditambahkan', 'data' => $satuan]);
         }
@@ -31,7 +33,10 @@ class SatuanController extends Controller
     public function update(Request $request, $id)
     {
         $satuan = Satuan::findOrFail($id);
-        $satuan->update($request->all());
+        $satuan->update([
+            'nama'     => $request->nama,
+            'stok_min' => $request->stok_min ?? 0,
+        ]);
         if ($request->ajax()) {
             return response()->json(['success' => true, 'message' => 'Satuan berhasil diubah', 'data' => $satuan]);
         }

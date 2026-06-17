@@ -45,8 +45,8 @@
 
 <!-- HEADER -->
 <div class="header-blue">
-    <h4 class="mb-1">BARANG KADALUARSA</h4>
-    <small>Transaksi > Barang Kadaluarsa</small>
+    <h4 class="mb-1">OBAT KADALUARSA</h4>
+    <small>Transaksi > Obat Kadaluarsa</small>
 </div>
 
 <!-- TABS NAVIGATION -->
@@ -58,7 +58,7 @@
     </li>
     <li class="nav-item" role="presentation">
         <button class="nav-link" id="pills-log-tab" data-bs-toggle="pill" data-bs-target="#pills-log" type="button" role="tab" aria-controls="pills-log" aria-selected="false">
-            <i class="bi bi-clock-history me-2"></i>Log Pembuangan Barang
+            <i class="bi bi-clock-history me-2"></i>Log Pembuangan Obat
         </button>
     </li>
 </ul>
@@ -81,8 +81,8 @@
                     <thead>
                         <tr>
                             <th>No</th>
-                            <th>Kode Barang</th>
-                            <th>Nama Barang</th>
+                            <th>Kode Obat</th>
+                            <th>Nama Obat</th>
                             <th>Kategori</th>
                             <th>Stok Aktif</th>
                             <th>Satuan</th>
@@ -154,8 +154,8 @@
             <!-- TOP -->
             <div class="table-top">
                 <div>
-                    <h5>Log Pencatatan Barang Dibuang/Kadaluarsa</h5>
-                    <small>Catatan transaksi pengurangan stok akibat barang rusak atau kadaluarsa.</small>
+                    <h5>Log Pencatatan Obat Dibuang/Kadaluarsa</h5>
+                    <small>Catatan transaksi pengurangan stok akibat obat rusak atau kadaluarsa.</small>
                 </div>
                 <div class="top-action">
                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahModal">+ TAMBAH DATA</button>
@@ -167,8 +167,8 @@
                 <thead>
                     <tr>
                         <th>No</th>
-                        <th>Kode Barang</th>
-                        <th>Nama Barang</th>
+                        <th>Kode Obat</th>
+                        <th>Nama Obat</th>
                         <th>Tanggal Dicatat</th>
                         <th>Jumlah</th>
                         <th>Satuan</th>
@@ -225,7 +225,7 @@
                 @csrf
                 <input type="hidden" name="jenis" value="kadaluarsa">
                 <div class="modal-header">
-                    <h5 class="modal-title">Tambah Barang Kadaluarsa</h5>
+                    <h5 class="modal-title">Tambah Obat Kadaluarsa</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -248,7 +248,7 @@
                     </div>
                     <div class="mb-3">
                         <label>Keterangan</label>
-                        <input type="text" name="keterangan" class="form-control" value="Barang Kadaluarsa">
+                        <input type="text" name="keterangan" class="form-control" value="Obat Kadaluarsa">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -270,7 +270,7 @@
                 @method('PUT')
                 <input type="hidden" name="jenis" value="kadaluarsa">
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Barang Kadaluarsa</h5>
+                    <h5 class="modal-title">Edit Obat Kadaluarsa</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">

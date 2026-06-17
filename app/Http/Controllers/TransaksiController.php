@@ -15,15 +15,14 @@ class TransaksiController extends Controller
             abort(404);
         }
 
-        // Jika jenisnya 'keluar', kita load transaksi 'keluar' dan 'kadaluarsa' agar terhubung!
         if ($jenis === 'keluar') {
             $transaksi = Transaksi::with('obat')->has('obat')->whereIn('jenis', ['keluar', 'kadaluarsa'])->latest()->paginate(10);
         } else {
             $transaksi = Transaksi::with('obat')->has('obat')->where('jenis', $jenis)->latest()->paginate(10);
         }
-        
+
         $obat = Obat::all();
-        
+
         $view = 'transaksi.' . $jenis;
         if (!view()->exists($view)) {
             abort(404);
@@ -35,72 +34,78 @@ class TransaksiController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'obat_id' => 'required|exists:obat,id',
-            'jenis' => 'required|in:masuk,keluar,kadaluarsa',
-            'jumlah' => 'required|numeric|min:1',
-            'tanggal' => 'required|date',
+            'obat_id'        => 'required|exists:obat,id',
+            'jenis'          => 'required|in:masuk,keluar,kadaluarsa',
+            'jumlah'         => 'required|numeric|min:1',
+            'tanggal'        => 'required|date',
             'tgl_kadaluarsa' => 'nullable|date',
         ]);
 
         $obat = Obat::findOrFail($request->obat_id);
 
-        // Validasi stok jika barang keluar / kadaluarsa
+        // Validasi stok jika obat keluar / kadaluarsa
         if (in_array($request->jenis, ['keluar', 'kadaluarsa'])) {
             if ($request->jumlah > $obat->stok) {
                 $msg = 'Stok obat tidak mencukupi! Stok saat ini: ' . $obat->stok;
                 if ($request->ajax()) {
-                    return response()->json([
-                        'success' => false,
-                        'errors' => ['jumlah' => [$msg]]
-                    ], 422);
+                    return response()->json(['success' => false, 'errors' => ['jumlah' => [$msg]]], 422);
                 }
                 return back()->withInput()->withErrors(['jumlah' => $msg]);
             }
         }
 
-        $transaksi = Transaksi::create($request->all());
+        $transaksi = Transaksi::create([
+            'obat_id'        => $request->obat_id,
+            'jenis'          => $request->jenis,
+            'jumlah'         => $request->jumlah,
+            'tanggal'        => $request->tanggal,
+            'keterangan'     => $request->keterangan,
+            'tgl_kadaluarsa' => $request->jenis === 'masuk' ? $request->tgl_kadaluarsa : null,
+        ]);
 
-        // Update stok obat
-        if ($request->jenis == 'masuk') {
-            $obat->stok += $request->jumlah;
-            if ($request->filled('tgl_kadaluarsa')) {
-                $obat->tgl_kadaluarsa = $request->tgl_kadaluarsa;
+        // Cek stok menipis setelah transaksi keluar
+        $stokMenipisMsg = null;
+        if (in_array($request->jenis, ['keluar', 'kadaluarsa'])) {
+            $obat->refresh();
+            $stokMin = $obat->stok_min;
+            if ($stokMin > 0 && $obat->stok <= $stokMin) {
+                $stokMenipisMsg = '⚠️ Peringatan: Stok obat ' . $obat->nama . ' sudah menipis! Sisa stok: ' . $obat->stok . ' (Min: ' . $stokMin . ')';
             }
-        } elseif ($request->jenis == 'keluar' || $request->jenis == 'kadaluarsa') {
-            $obat->stok -= $request->jumlah;
         }
-        $obat->save();
 
         if ($request->ajax()) {
             return response()->json([
-                'success' => true,
-                'message' => 'Transaksi berhasil ditambahkan',
-                'data' => $transaksi
+                'success'          => true,
+                'message'          => 'Transaksi berhasil ditambahkan',
+                'stok_menipis_msg' => $stokMenipisMsg,
+                'data'             => $transaksi
             ]);
         }
 
-        return back()->with('success', 'Transaksi berhasil ditambahkan');
+        $successMsg = 'Transaksi berhasil ditambahkan';
+        if ($stokMenipisMsg) {
+            $successMsg .= ' | ' . $stokMenipisMsg;
+        }
+        return back()->with('success', $successMsg)->with('stok_menipis', $stokMenipisMsg);
     }
 
     public function update(Request $request, $id)
     {
         $transaksi = Transaksi::findOrFail($id);
-        
+
         $request->validate([
-            'obat_id' => 'required|exists:obat,id',
-            'jenis' => 'required|in:masuk,keluar,kadaluarsa',
-            'jumlah' => 'required|numeric|min:1',
-            'tanggal' => 'required|date',
+            'obat_id'        => 'required|exists:obat,id',
+            'jenis'          => 'required|in:masuk,keluar,kadaluarsa',
+            'jumlah'         => 'required|numeric|min:1',
+            'tanggal'        => 'required|date',
             'tgl_kadaluarsa' => 'nullable|date',
         ]);
 
-        $obat_lama = Obat::findOrFail($transaksi->obat_id);
         $obat_baru = Obat::findOrFail($request->obat_id);
 
-        // Temp revert old stock to check availability
+        // Hitung stok sementara
         $temp_stok_baru = $obat_baru->stok;
         if ($transaksi->obat_id == $request->obat_id) {
-            // Jika obatnya sama, kita hitung stok tentatif dengan mengembalikan transaksi lama
             if ($transaksi->jenis == 'masuk') {
                 $temp_stok_baru -= $transaksi->jumlah;
             } else {
@@ -108,48 +113,31 @@ class TransaksiController extends Controller
             }
         }
 
-        // Validasi stok baru jika jenis transaksi keluar/kadaluarsa
         if (in_array($request->jenis, ['keluar', 'kadaluarsa'])) {
             if ($request->jumlah > $temp_stok_baru) {
                 $msg = 'Stok obat tidak mencukupi setelah perubahan! Stok tersedia: ' . $temp_stok_baru;
                 if ($request->ajax()) {
-                    return response()->json([
-                        'success' => false,
-                        'errors' => ['jumlah' => [$msg]]
-                    ], 422);
+                    return response()->json(['success' => false, 'errors' => ['jumlah' => [$msg]]], 422);
                 }
                 return back()->withInput()->withErrors(['jumlah' => $msg]);
             }
         }
 
-        // Revert old stock permanently
-        if ($transaksi->jenis == 'masuk') {
-            $obat_lama->stok -= $transaksi->jumlah;
-        } elseif ($transaksi->jenis == 'keluar' || $transaksi->jenis == 'kadaluarsa') {
-            $obat_lama->stok += $transaksi->jumlah;
-        }
-        $obat_lama->save();
-
-        // Update transaction
-        $transaksi->update($request->all());
-
-        // Apply new stock (refresh model in case it was the same model)
-        $obat_baru = Obat::findOrFail($request->obat_id);
-        if ($request->jenis == 'masuk') {
-            $obat_baru->stok += $request->jumlah;
-            if ($request->filled('tgl_kadaluarsa')) {
-                $obat_baru->tgl_kadaluarsa = $request->tgl_kadaluarsa;
-            }
-        } elseif ($request->jenis == 'keluar' || $request->jenis == 'kadaluarsa') {
-            $obat_baru->stok -= $request->jumlah;
-        }
-        $obat_baru->save();
+        // Update transaksi
+        $transaksi->update([
+            'obat_id'        => $request->obat_id,
+            'jenis'          => $request->jenis,
+            'jumlah'         => $request->jumlah,
+            'tanggal'        => $request->tanggal,
+            'keterangan'     => $request->keterangan,
+            'tgl_kadaluarsa' => $request->jenis === 'masuk' ? $request->tgl_kadaluarsa : null,
+        ]);
 
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
                 'message' => 'Transaksi berhasil diperbarui',
-                'data' => $transaksi
+                'data'    => $transaksi
             ]);
         }
 
@@ -159,16 +147,6 @@ class TransaksiController extends Controller
     public function destroy($id)
     {
         $transaksi = Transaksi::findOrFail($id);
-        
-        // Revert old stock
-        $obat = Obat::find($transaksi->obat_id);
-        if ($transaksi->jenis == 'masuk') {
-            $obat->stok -= $transaksi->jumlah;
-        } elseif ($transaksi->jenis == 'keluar' || $transaksi->jenis == 'kadaluarsa') {
-            $obat->stok += $transaksi->jumlah;
-        }
-        $obat->save();
-
         $transaksi->delete();
 
         if (request()->ajax()) {

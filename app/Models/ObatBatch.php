@@ -4,17 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Transaksi extends Model
+class ObatBatch extends Model
 {
-    protected $table = 'transaksi';
+    protected $table = 'obat_batches';
 
     protected $fillable = [
         'obat_id',
-        'jenis',
-        'jumlah',
-        'tanggal',
-        'keterangan',
         'tgl_kadaluarsa',
+        'stok',
     ];
 
     public function obat()

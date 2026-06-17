@@ -6,13 +6,13 @@
 
     <!-- HEADER -->
     <div class="header-blue">
-        <h4>LAPORAN BARANG MASUK</h4>
-        <small>Master > Laporan Barang > Laporan Barang Masuk</small>
+        <h4>LAPORAN OBAT MASUK</h4>
+        <small>Master > Laporan Obat > Laporan Obat Masuk</small>
     </div>
 
     <!-- FILTER -->
     <div class="card-box mb-3">
-        <h5 style="margin-bottom:15px;">Filter Data Barang</h5>
+        <h5 style="margin-bottom:15px;">Filter Data Obat</h5>
 
         <form action="/laporan/masuk" method="GET">
             <div class="filter-box">
@@ -39,7 +39,7 @@
 
         <div class="table-top">
             <div>
-                <h5>Data Laporan Barang Masuk</h5>
+                <h5>Data Laporan Obat Masuk</h5>
                 <small>
                     Tampilkan 
                     <select>
@@ -55,8 +55,8 @@
             <thead>
                 <tr>
                     <th>No</th>
-                    <th>Kode Barang</th>
-                    <th>Nama Barang</th>
+                    <th>Kode Obat</th>
+                    <th>Nama Obat</th>
                     <th>Tanggal Masuk</th>
                     <th>Satuan</th>
                     <th>Jumlah Masuk</th>

@@ -24,5 +24,7 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('local')) {
             \URL::forceScheme('https');
         }
+
+        \App\Models\Transaksi::observe(\App\Observers\TransaksiObserver::class);
     }
 }

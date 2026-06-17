@@ -42,15 +42,15 @@
 
     <!-- DROPDOWN STOCK -->
     <a href="#" class="d-block py-2 submenu-toggle" data-target="#stockMenu">
-        <i class="bi bi-box"></i> Stock Barang
+        <i class="bi bi-box"></i> Stock Obat
         <i class="bi bi-chevron-down float-end me-2" style="font-size: 12px; margin-top: 4px;"></i>
     </a>
 
     <div class="ms-3" id="stockMenu" style="{{ request()->is('obat', 'kategori', 'jenis', 'satuan') ? '' : 'display: none;' }}">
-        <a href="/obat" class="d-block py-1 {{ request()->is('obat') ? 'fw-bold text-primary' : '' }}">• Data Barang</a>
-        <a href="/kategori" class="d-block py-1 {{ request()->is('kategori') ? 'fw-bold text-primary' : '' }}">• Kategori Barang</a>
-        <a href="/jenis" class="d-block py-1 {{ request()->is('jenis') ? 'fw-bold text-primary' : '' }}">• Jenis Barang</a>
-        <a href="/satuan" class="d-block py-1 {{ request()->is('satuan') ? 'fw-bold text-primary' : '' }}">• Satuan Barang</a>
+        <a href="/obat" class="d-block py-1 {{ request()->is('obat') ? 'fw-bold text-primary' : '' }}">• Data Obat</a>
+        <a href="/kategori" class="d-block py-1 {{ request()->is('kategori') ? 'fw-bold text-primary' : '' }}">• Kategori Obat</a>
+        <a href="/jenis" class="d-block py-1 {{ request()->is('jenis') ? 'fw-bold text-primary' : '' }}">• Jenis Obat</a>
+        <a href="/satuan" class="d-block py-1 {{ request()->is('satuan') ? 'fw-bold text-primary' : '' }}">• Satuan Obat</a>
     </div>
 
     <a href="/supplier" class="d-block py-2 {{ request()->is('supplier') ? 'fw-bold text-primary' : '' }}">
@@ -60,28 +60,28 @@
     <small class="text-muted mt-3 d-block">TRANSAKSI</small>
 
     <a href="/transaksi/masuk" class="d-block py-2 {{ request()->is('transaksi/masuk') ? 'fw-bold text-primary' : '' }}">
-        <i class="bi bi-box-arrow-in-down"></i> Barang Masuk
+        <i class="bi bi-box-arrow-in-down"></i> Obat Masuk
     </a>
 
     <a href="/transaksi/keluar" class="d-block py-2 {{ request()->is('transaksi/keluar') ? 'fw-bold text-primary' : '' }}">
-        <i class="bi bi-box-arrow-up"></i> Barang Keluar
+        <i class="bi bi-box-arrow-up"></i> Obat Keluar
     </a>
 
     <a href="/transaksi/kadaluarsa" class="d-block py-2 {{ request()->is('transaksi/kadaluarsa') ? 'fw-bold text-primary' : '' }}">
-        <i class="bi bi-calendar-x"></i> Barang Kadaluarsa
+        <i class="bi bi-calendar-x"></i> Obat Kadaluarsa
     </a>
 
     <small class="text-muted mt-3 d-block">LAPORAN</small>
 
 <!-- DROPDOWN LAPORAN BARANG -->
 <a href="#" class="d-block py-2 submenu-toggle" data-target="#laporanBarang">
-    <i class="bi bi-file-earmark-text"></i> Laporan Barang
+    <i class="bi bi-file-earmark-text"></i> Laporan Obat
     <i class="bi bi-chevron-down float-end me-2" style="font-size: 12px; margin-top: 4px;"></i>
 </a>
 
 <div class="ms-3" id="laporanBarang" style="{{ request()->is('laporan/masuk', 'laporan/keluar') ? '' : 'display: none;' }}">
-    <a href="/laporan/masuk" class="d-block py-1 {{ request()->is('laporan/masuk') ? 'fw-bold text-primary' : '' }}">• Laporan Barang Masuk</a>
-    <a href="/laporan/keluar" class="d-block py-1 {{ request()->is('laporan/keluar') ? 'fw-bold text-primary' : '' }}">• Laporan Barang Keluar</a>
+    <a href="/laporan/masuk" class="d-block py-1 {{ request()->is('laporan/masuk') ? 'fw-bold text-primary' : '' }}">• Laporan Obat Masuk</a>
+    <a href="/laporan/keluar" class="d-block py-1 {{ request()->is('laporan/keluar') ? 'fw-bold text-primary' : '' }}">• Laporan Obat Keluar</a>
 </div>
 
 <!-- LAPORAN PENJUALAN REMOVED -->
@@ -114,25 +114,44 @@
             $globalNow = \Carbon\Carbon::now();
             $globalAlerts = [];
 
-            // Ambil data obat yang memiliki tanggal kadaluarsa
-            $globalObatKadaluarsa = \App\Models\Obat::whereNotNull('tgl_kadaluarsa')->get();
+            // 1. Cek Kadaluarsa dari ObatBatch
+            $globalObatKadaluarsa = \App\Models\ObatBatch::with('obat')->where('stok', '>', 0)->get();
 
-            foreach($globalObatKadaluarsa as $o) {
-                $kd = \Carbon\Carbon::parse($o->tgl_kadaluarsa);
+            foreach($globalObatKadaluarsa as $b) {
+                $kd = \Carbon\Carbon::parse($b->tgl_kadaluarsa);
                 if ($kd->isPast()) {
                     $globalExpiredCount++;
                     $globalAlerts[] = [
                         'type' => 'expired',
-                        'message' => 'Obat ' . $o->nama . ' sudah kadaluarsa (' . $kd->format('d/m/Y') . ')',
+                        'icon' => 'bi-exclamation-circle-fill',
+                        'color' => 'text-danger',
+                        'message' => 'Obat ' . $b->obat->nama . ' (' . $b->stok . ' pcs) kadaluarsa pada ' . $kd->format('d/m/Y'),
                     ];
                 } elseif ($globalNow->diffInDays($kd, false) <= 90) {
                     $globalNearExpiredCount++;
                     $globalAlerts[] = [
                         'type' => 'near',
-                        'message' => 'Obat ' . $o->nama . ' mendekati kadaluarsa (' . $kd->format('d/m/Y') . ')',
+                        'icon' => 'bi-exclamation-circle-fill',
+                        'color' => 'text-warning',
+                        'message' => 'Obat ' . $b->obat->nama . ' (' . $b->stok . ' pcs) akan kadaluarsa pada ' . $kd->format('d/m/Y'),
                     ];
                 }
             }
+
+            // 2. Cek Stok Menipis dari Obat
+            $globalObat = \App\Models\Obat::with('satuan')->get();
+            foreach ($globalObat as $o) {
+                $stokMin = $o->satuan ? ($o->satuan->stok_min ?? 0) : 0;
+                if ($stokMin > 0 && $o->stok <= $stokMin) {
+                    $globalAlerts[] = [
+                        'type' => 'low_stock',
+                        'icon' => 'bi-box-seam-fill',
+                        'color' => 'text-warning',
+                        'message' => 'Stok ' . $o->nama . ' menipis! Sisa ' . $o->stok . ' (Min: ' . $stokMin . ')',
+                    ];
+                }
+            }
+
             $totalAlerts = count($globalAlerts);
         @endphp
 
@@ -147,24 +166,24 @@
             </div>
             <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="min-width: 320px; border-radius: 16px; max-height: 400px; overflow-y: auto; z-index: 10000; margin-top: 10px;">
                 <li class="px-3 py-2 border-bottom">
-                    <strong class="text-dark">Notifikasi Kadaluarsa</strong>
+                    <strong class="text-dark">Notifikasi Sistem</strong>
                 </li>
                 @forelse(array_slice($globalAlerts, 0, 5) as $alert)
                     <li class="px-3 py-2 border-bottom text-wrap" style="font-size: 13px;">
                         <span class="d-flex align-items-start">
-                            <i class="bi bi-exclamation-circle-fill me-2 mt-1 {{ $alert['type'] == 'expired' ? 'text-danger' : 'text-warning' }}"></i>
+                            <i class="bi {{ $alert['icon'] }} me-2 mt-1 {{ $alert['color'] }}"></i>
                             <span>{{ $alert['message'] }}</span>
                         </span>
                     </li>
                 @empty
                     <li class="px-3 py-4 text-center text-muted" style="font-size: 13px;">
                         <i class="bi bi-check-circle-fill text-success fs-4 d-block mb-2"></i>
-                        Semua obat dalam kondisi aman!
+                        Semua stok & obat dalam kondisi aman!
                     </li>
                 @endforelse
                 @if($totalAlerts > 5)
                     <li class="text-center py-2">
-                        <a href="/transaksi/kadaluarsa" class="text-decoration-none text-primary" style="font-size: 12px; font-weight: 600;">Lihat Semua Notifikasi ({{ $totalAlerts }})</a>
+                        <a href="/" class="text-decoration-none text-primary" style="font-size: 12px; font-weight: 600;">Lihat Detail di Dashboard ({{ $totalAlerts }})</a>
                     </li>
                 @endif
             </ul>

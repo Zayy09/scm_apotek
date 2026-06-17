@@ -9,7 +9,7 @@ class ObatController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Obat::with('transaksi');
+        $query = Obat::with(['transaksi', 'kategori', 'jenis', 'satuan', 'supplier']);
 
         if ($request->filled('kategori')) {
             $query->whereHas('kategori', function($q) use ($request) {
@@ -17,13 +17,14 @@ class ObatController extends Controller
             });
         }
 
-        $obat = $query->with('transaksi')->paginate(10);
-        
-        $kategoriList = \App\Models\Kategori::all();
-        $jenisList = \App\Models\Jenis::all();
-        $satuanList = \App\Models\Satuan::all();
+        $obat = $query->paginate(10);
 
-        return view('obat.data', compact('obat', 'kategoriList', 'jenisList', 'satuanList'));
+        $kategoriList = \App\Models\Kategori::all();
+        $jenisList    = \App\Models\Jenis::all();
+        $satuanList   = \App\Models\Satuan::all();
+        $supplierList = \App\Models\Supplier::orderBy('nama')->get();
+
+        return view('obat.data', compact('obat', 'kategoriList', 'jenisList', 'satuanList', 'supplierList'));
     }
 
     public function store(Request $request)
@@ -31,13 +32,13 @@ class ObatController extends Controller
         $request->validate([
             'nama' => 'required',
         ]);
-        
+
         $lastObat = Obat::orderBy('id', 'desc')->first();
-        $nextId = $lastObat ? $lastObat->id + 1 : 1;
-        $kode = 'OBT-' . str_pad($nextId, 3, '0', STR_PAD_LEFT);
-        
-        $data = $request->except('stok');
-        $data['kode'] = $kode;
+        $nextId   = $lastObat ? $lastObat->id + 1 : 1;
+        $kode     = 'OBT-' . str_pad($nextId, 3, '0', STR_PAD_LEFT);
+
+        $data          = $request->except(['stok', '_token']);
+        $data['kode']  = $kode;
 
         $obat = Obat::create($data);
 
@@ -45,7 +46,7 @@ class ObatController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Data obat berhasil ditambahkan',
-                'data' => $obat
+                'data'    => $obat
             ]);
         }
 
@@ -60,13 +61,13 @@ class ObatController extends Controller
             'nama' => 'required',
         ]);
 
-        $obat->update($request->except(['kode', 'stok']));
+        $obat->update($request->except(['kode', 'stok', '_token', '_method']));
 
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
                 'message' => 'Data obat berhasil diubah',
-                'data' => $obat
+                'data'    => $obat
             ]);
         }
 

@@ -13,8 +13,8 @@
 
     <!-- HEADER -->
     <div class="header-blue">
-        <h4>KATEGORI BARANG</h4>
-        <small>Master > Stock Barang > Data Kategori</small>
+        <h4>KATEGORI OBAT</h4>
+        <small>Master > Stock Obat > Data Kategori</small>
     </div>
 
     <!-- CARD -->
@@ -23,7 +23,7 @@
         <!-- TOP -->
         <div class="table-top">
             <div>
-                <h5>Data Kategori Barang</h5>
+                <h5>Data Kategori Obat</h5>
                 <small>
                     Tampilkan 
                     <select>
@@ -46,7 +46,7 @@
             <thead>
                 <tr>
                     <th width="60">No</th>
-                    <th>Kategori Barang</th>
+                    <th>Kategori Obat</th>
                     <th width="180">Aksi</th>
                 </tr>
             </thead>
